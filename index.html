@@ -10,6 +10,24 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <title>ESSENCE — The Art of Feeling</title>
+<style>
+  #essence-boot {min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:#15100e;color:#e8d7c2;text-align:center;padding:30px;font-family:Georgia,serif}
+  #essence-boot .boot-mark {font-size:clamp(42px,9vw,78px);letter-spacing:.18em}
+  #essence-boot .boot-sub {font:10px system-ui,sans-serif;letter-spacing:.35em;color:#bda188}
+  #essence-boot .boot-help {display:none;font:13px/1.8 system-ui,sans-serif;max-width:510px;color:#c6ae93}
+</style>
 </head>
-<body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body>
+<body>
+<div id="root"><div id="essence-boot"><span class="boot-mark">ESSENCE</span><span class="boot-sub">THE ART OF FEELING</span><p class="boot-help">Unable to load the storefront. The website must be deployed from the compiled <strong>dist/</strong> directory, not the React source. Please check the ESSENCE build and cPanel deployment workflow.</p></div></div>
+<script>
+window.setTimeout(function () {
+  var boot = document.getElementById('essence-boot');
+  if (boot) {
+    var help = boot.querySelector('.boot-help');
+    if (help) help.style.display = 'block';
+  }
+}, 6500);
+</script>
+<script type="module" src="/src/main.jsx"></script>
+</body>
 </html>
