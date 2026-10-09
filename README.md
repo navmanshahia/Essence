@@ -17,6 +17,24 @@ A cinematic luxury-fragrance concept storefront built with React, Vite, Three.js
 
 **Important:** This is a **concept storefront**, not a live commerce operation. Prices are fictional examples in Canadian dollars. Online payments, inventory, fulfilment, transactional email, user accounts, real fragrance production, and a secure admin portal are **not connected**. The order enquiry and early-access buttons use mailto. Do not advertise this as a live payment store before connecting a secure commerce backend.
 
+
+## FIX: Blank white page on cPanel
+
+**Do not serve the source `index.html` directly.** The repository uses Vite and its source HTML points to JSX (`/src/main.jsx`), which browsers cannot execute without bundling. You must serve the generated `dist/index.html` plus `dist/assets/`.
+
+**Automated main-branch deployment (recommended):**
+1. Open **Actions → Build ESSENCE website and publish cPanel-ready files**. Run the workflow if no build was triggered automatically after a push.
+2. Check the workflow is green. It now commits the compiled `dist/` directory into `main` with a `build:` commit. If the workflow fails at the commit step, set **Settings → Actions → General → Workflow permissions → Read and write permissions** and rerun; organization/branch protection settings can also restrict writing.
+3. In cPanel → **Git Version Control** → ESSENCE repository → **Pull or Deploy**, select **Update from Remote**, then **Deploy HEAD Commit**.
+4. The included `.cpanel.yml` copies `dist/` into `$HOME/public_html/Essence/`. This target corresponds to `https://elite-noir.com/Essence/` if your domain's document root is `public_html`. **If you use a different folder, edit the DEPLOYPATH in `.cpanel.yml` before deploying.**
+5. Force-refresh the site to discard cached JS bundles.
+
+**Alternative:** Download the **essence-dist** artifact from a successful GitHub Actions run, extract it, and upload the **contents** of the folder to your website's document root in cPanel File Manager. Do not upload the source `src/` folder or raw `index.html` as the live site.
+
+**GitHub Pages:** In **Settings → Pages**, choose **Source: GitHub Actions**. The `Deploy ESSENCE to GitHub Pages` workflow publishes built files to `https://navmanshahia.github.io/Essence/` when Pages is enabled.
+
+A new branded loading/error fallback makes uncompiled deployments easier to diagnose; it does **not** replace the need to build and deploy production assets.
+
 ## Local development
 
 Install Node.js 20.19+ or 22+ and run:
