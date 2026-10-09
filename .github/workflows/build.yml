@@ -1,22 +1,60 @@
-name: Build ESSENCE website
+name: Build ESSENCE website and publish cPanel-ready files
+
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'dist/**'
   workflow_dispatch:
+
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: essence-build-main
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-audit --no-fund
-      - run: npm run build
-      - uses: actions/upload-artifact@v4
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build production website
+        run: npm run build
+      - name: Verify deployable HTML and bundled assets
+        shell: bash
+        run: |
+          test -s dist/index.html || { echo "::error::Missing dist/index.html"; exit 1; }
+          test -n "$(find dist/assets -maxdepth 1 -name '*.js' -print -quit)" || { echo "::error::Missing Vite JavaScript bundle"; exit 1; }
+          if grep -q '/src/main.jsx' dist/index.html; then
+            echo "::error::Production HTML still points to uncompiled JSX"
+            exit 1
+          fi
+          echo "Compiled HTML and JS assets exist."
+      - name: Upload deployable site artifact
+        uses: actions/upload-artifact@v4
         with:
           name: essence-dist
           path: dist/
           if-no-files-found: error
+      - name: Keep compiled dist in main for cPanel Git deployment
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f dist/
+          if git diff --cached --quiet; then
+            echo "Compiled dist already up to date."
+          else
+            git commit -m "build: publish compiled ESSENCE storefront [skip ci]"
+            git push origin HEAD:main
+          fi
